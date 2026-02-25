@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HelpShift CS Dashboard v3.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--card:#1a2235;--card-h:#1f2a40;--border:#2a3550;--accent:#4f6fff;--accent-s:rgba(79,111,255,.12);--green:#34d399;--green-s:rgba(52,211,153,.12);--red:#f87171;--orange:#fbbf24;--orange-s:rgba(251,191,36,.12);--purple:#a78bfa;--purple-s:rgba(167,139,250,.12);--cyan:#22d3ee;--pink:#f472b6;--t1:#f0f4ff;--t2:#8899bb;--t3:#556688;--r:10px;--rs:6px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}.hdr-l{display:flex;align-items:center;gap:10px}.logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}.hdr-t{font-size:16px;font-weight:700}.hdr-st{font-size:10px;color:var(--t2)}
+.tabs{display:flex;gap:2px;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto}.tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}.tab:hover{color:var(--t1)}.tab.on{color:var(--accent);border-color:var(--accent)}
+.filters{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border)}.fg{display:flex;flex-direction:column;gap:2px}.fg label{font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}.fg input,.fg select{background:var(--card);border:1px solid var(--border);color:var(--t1);padding:6px 8px;border-radius:var(--rs);font-size:11px;font-family:inherit;outline:none}.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.btn{padding:7px 14px;border:none;border-radius:var(--rs);font-size:11px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;display:inline-flex;align-items:center;gap:4px}.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:#3d5bef}.btn-s{background:var(--card);color:var(--t1);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.content{padding:14px 20px;max-width:1440px;margin:0 auto}.tp{display:none}.tp.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px}.cd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px}.cd-lb{font-size:10px;color:var(--t2);margin-bottom:3px}.cd-v{font-size:20px;font-weight:800;letter-spacing:-.5px}.cd-sub{font-size:9px;color:var(--t3);margin-top:2px}
+.cd-v.blue{color:var(--accent)}.cd-v.green{color:var(--green)}.cd-v.orange{color:var(--orange)}.cd-v.red{color:var(--red)}.cd-v.purple{color:var(--purple)}.cd-v.cyan{color:var(--cyan)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}.panel-t{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:12px}@media(max-width:900px){.row2{grid-template-columns:1fr}}
+.sub-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--bg);border-radius:var(--rs);padding:3px;width:fit-content}.sub-tab{padding:6px 16px;font-size:11px;font-weight:600;border:none;border-radius:5px;cursor:pointer;background:transparent;color:var(--t2);font-family:inherit;transition:.2s}.sub-tab.on{background:var(--accent);color:#fff}
+.glist{display:flex;flex-direction:column;gap:5px}.gi{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--border)}.gi-l{display:flex;align-items:center;gap:7px}.gi-dot{width:8px;height:8px;border-radius:50%}.gi-name{font-size:12px;font-weight:500}.gi-cnt{font-size:13px;font-weight:700}.gi-pct{font-size:9px;color:var(--t3);margin-left:5px}
+.issue-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:6px;cursor:pointer;transition:.2s}.issue-card:hover{border-color:var(--accent);background:var(--card-h)}.issue-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px}.issue-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:10px;color:var(--t3)}.issue-meta span{display:flex;align-items:center;gap:3px}.issue-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}.issue-game{font-size:11px;font-weight:600}.issue-body{font-size:12px;line-height:1.6;color:var(--t2);margin-top:6px;word-break:break-word;white-space:pre-wrap}.issue-body.short{max-height:80px;overflow:hidden;position:relative}.issue-body.short::after{content:'';position:absolute;bottom:0;left:0;right:0;height:25px;background:linear-gradient(transparent,var(--bg))}.issue-expand{font-size:10px;color:var(--accent);cursor:pointer;margin-top:3px;display:inline-block}.issue-tr{background:var(--card);border-left:3px solid var(--green);border-radius:0 var(--rs) var(--rs) 0;padding:8px 10px;margin-top:6px;font-size:11px;line-height:1.6;color:var(--green)}.issue-tr-label{font-size:9px;color:var(--t3);margin-bottom:2px}
+.badge{display:inline-block;padding:2px 6px;border-radius:20px;font-size:9px;font-weight:600}.badge-g{background:var(--green-s);color:var(--green)}.badge-o{background:var(--orange-s);color:var(--orange)}.badge-b{background:var(--accent-s);color:var(--accent)}.badge-p{background:var(--purple-s);color:var(--purple)}
+.detail-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200}.detail-overlay.on{display:flex;justify-content:flex-end}.detail-panel{width:580px;max-width:92vw;background:var(--bg2);height:100%;overflow-y:auto;padding:20px;border-left:1px solid var(--border);animation:slideIn .2s ease}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.detail-close{position:absolute;top:12px;right:12px;background:var(--card);border:1px solid var(--border);color:var(--t1);width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}.detail-field{margin-bottom:12px}.detail-label{font-size:9px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}.detail-value{font-size:12px;line-height:1.5}.detail-msg{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px;font-size:12px;line-height:1.7;white-space:pre-wrap;max-height:500px;overflow-y:auto;word-break:break-word}
+.paging{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}.paging .btn{padding:4px 10px;font-size:10px}.paging span{font-size:11px;color:var(--t2)}
+.chat-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);height:380px;overflow-y:auto;padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px}.chat-msg{max-width:85%;padding:8px 11px;border-radius:9px;font-size:11px;line-height:1.6;word-wrap:break-word;white-space:pre-wrap}.chat-msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:3px}.chat-msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:3px}.chat-msg.thinking{opacity:.6;font-style:italic}.chat-input{display:flex;gap:6px}.chat-input input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--t1);padding:8px 10px;border-radius:var(--rs);font-size:11px;font-family:inherit;outline:none}.chat-input input:focus{border-color:var(--accent)}.quick-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}.quick-btns .btn{font-size:10px;padding:4px 9px}
+.metric-bar{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}.metric-bar:last-child{border:none}.metric-label{font-size:11px;font-weight:500;min-width:110px}.metric-fill-wrap{flex:1;height:18px;background:var(--bg);border-radius:9px;overflow:hidden}.metric-fill{height:100%;border-radius:9px;transition:width .6s ease}.metric-val{font-size:12px;font-weight:700;min-width:65px;text-align:right;font-family:'JetBrains Mono',monospace}
+.tbl-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11px}th{text-align:left;padding:7px 8px;background:var(--bg);color:var(--t2);font-weight:600;font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border);position:sticky;top:0}td{padding:6px 8px;border-bottom:1px solid var(--border)}tr:hover td{background:var(--card-h)}
+.loading{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,14,23,.85);z-index:300;justify-content:center;align-items:center;flex-direction:column;gap:12px}.loading.on{display:flex}.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:12px;color:var(--t2)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.empty-state{text-align:center;padding:30px;color:var(--t3)}.empty-state p{font-size:12px}
+</style>
+</head>
+<body>
+<div class="hdr"><div class="hdr-l"><div class="logo">CS</div><div><div class="hdr-t">HelpShift CS Dashboard</div><div class="hdr-st">KRAFTON India · 7 Games</div></div></div><div style="font-size:10px;color:var(--t3)" id="lastUpdate"></div></div>
+<div class="tabs"><div class="tab on" onclick="showTab('overview')">📊 Overview</div><div class="tab" onclick="showTab('games')">🎮 게임별</div><div class="tab" onclick="showTab('response')">⏱️ 응답시간</div><div class="tab" onclick="showTab('issues')">📝 문의 원문</div><div class="tab" onclick="showTab('ai')">🤖 AI 분석</div></div>
+<div class="filters"><div class="fg"><label>시작일</label><input type="date" id="startDate"></div><div class="fg"><label>종료일</label><input type="date" id="endDate"></div><div class="fg"><label>게임</label><select id="gameSelect"><option value="">전체 게임</option><option value="krafton-india_app_20240717091844547-62f05b00e5a5b23">CookieRun India</option><option value="krafton-india_app_20240717091844374-e48b135e5b6ea45">Bullet Echo India</option><option value="krafton-india_app_20240719044758107-ba557f5e7e881b3">Road to Valor</option><option value="krafton-india_app_20240719045930403-4acfb0098f53f94">Archery King</option><option value="krafton-india_app_20241022021559571-f64cadbd3d6d70f">Astro Arena</option><option value="krafton-india_app_20251015090328113-d268da7f1636e94">RealCricket</option><option value="krafton-india_app_20260107064519768-4f1cd7fb42d4026">Sport Fantasy</option></select></div><div class="fg"><label>태그</label><input type="text" id="tagFilter" placeholder="billing, crash"></div><button class="btn btn-p" onclick="fetchData()" id="btnFetch">🔍 조회</button><button class="btn btn-s" onclick="downloadCSV()">📥 CSV</button></div>
+
+<div class="content">
+<!-- OVERVIEW -->
+<div class="tp on" id="tp-overview">
+  <div class="cards" id="overviewCards"></div>
+  <div class="sub-tabs"><button class="sub-tab on" onclick="setMode('ov','daily',this)">📅 일별</button><button class="sub-tab" onclick="setMode('ov','weekly',this)">📊 주별</button><button class="sub-tab" onclick="setMode('ov','monthly',this)">📆 월별</button></div>
+  <div class="row2"><div class="panel"><div class="panel-t" id="ovChartTitle">📈 일별 인입량</div><div style="height:240px"><canvas id="trendChart"></canvas></div></div><div class="panel"><div class="panel-t">🍩 게임별 분포</div><div style="height:240px"><canvas id="donutChart"></canvas></div></div></div>
+  <div class="panel"><div class="panel-t" id="ovTableTitle">📋 일별 상세</div><div class="tbl-wrap"><table><thead id="ovTH"></thead><tbody id="ovTB"></tbody></table></div></div>
+  <div class="panel"><div class="panel-t">📋 게임별 인입량</div><div class="glist" id="overviewGL"></div></div>
+</div>
+<!-- GAMES -->
+<div class="tp" id="tp-games"><div class="cards" id="gameCards"></div><div class="row2"><div class="panel"><div class="panel-t">📊 게임별 문의량</div><div id="gbWrap"><canvas id="gameBarChart"></canvas></div></div><div class="panel"><div class="panel-t">📋 상세</div><div class="glist" id="gameList"></div></div></div><div class="panel"><div class="panel-t">📈 게임별 일별 추이</div><div style="height:200px"><canvas id="gameLineChart"></canvas></div></div></div>
+<!-- RESPONSE -->
+<div class="tp" id="tp-response">
+  <div class="cards" id="rtCards"></div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <div class="sub-tabs"><button class="sub-tab on" onclick="setMode('rt','daily',this)">📅 일별</button><button class="sub-tab" onclick="setMode('rt','weekly',this)">📊 주별</button><button class="sub-tab" onclick="setMode('rt','monthly',this)">📆 월별</button></div>
+    <div class="fg" style="min-width:120px"><select id="rtGameFilter" onchange="rResponse()" style="padding:5px 8px;font-size:10px"><option value="">전체 게임</option></select></div>
+  </div>
+  <div class="row2"><div class="panel"><div class="panel-t" id="rtFrtTitle">⏱️ 평균 FRT (게임별)</div><div id="frtBars"></div></div><div class="panel"><div class="panel-t" id="rtRtTitle">🔧 평균 RT (게임별)</div><div id="rtBars"></div></div></div>
+  <div class="panel"><div class="panel-t" id="rtChartTitle">📈 일별 응답시간</div><div style="height:240px"><canvas id="rtTrendChart"></canvas></div></div>
+  <div class="panel"><div class="panel-t" id="rtTableTitle">📋 일별 응답시간 상세</div><div class="tbl-wrap"><table><thead id="rtTH"></thead><tbody id="rtTB"></tbody></table></div></div>
+</div>
+<!-- ISSUES -->
+<div class="tp" id="tp-issues"><div class="panel"><div class="panel-t">📝 문의 원문 <span id="issueCount" style="font-size:10px;color:var(--t3);font-weight:400"></span></div><div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><div class="fg" style="min-width:100px"><select id="issueGameFilter" onchange="renderIssues()" style="padding:5px 8px;font-size:10px"><option value="">전체 게임</option></select></div><label style="font-size:10px;color:var(--t2);display:flex;align-items:center;gap:4px"><input type="checkbox" id="autoTranslate" onchange="renderIssues()"> 자동 한국어 번역</label></div><div id="issueList"></div><div class="paging" id="paging"></div></div></div>
+<!-- AI -->
+<div class="tp" id="tp-ai"><div class="panel"><div class="panel-t">🤖 AI 분석 (Claude)</div><input type="hidden" id="aiKey"><div id="aiStatus" style="font-size:11px;margin-bottom:10px"></div><div class="quick-btns"><button class="btn btn-s" onclick="askAI('현재 데이터를 종합 분석해줘.')">📊 종합</button><button class="btn btn-s" onclick="askAI('문의 유형 분석 및 개선안')">🏷️ 유형</button><button class="btn btn-s" onclick="askAI('FRT/RT 분석 및 개선안')">⏱️ 응답시간</button><button class="btn btn-s" onclick="askAI('트렌드 분석')">📈 트렌드</button><button class="btn btn-s" onclick="askAI('CS 주간 리포트 작성')">📋 리포트</button></div><div class="chat-box" id="chatBox"></div><div class="chat-input"><input id="chatInput" placeholder="질문 입력..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-p" onclick="sendChat()">전송</button></div></div></div>
+</div>
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()"><div class="detail-panel" style="position:relative"><button class="detail-close" onclick="closeDetail()">✕</button><div id="detailContent"></div></div></div>
+<div class="loading" id="loading"><div class="spinner"></div><div class="loading-text" id="loadingText">조회 중...</div></div>
+
+<script>
+const WH='https://xiangxianjin.app.n8n.cloud/webhook/helpshift-fetch-issues';
+const GC={'RealCricket':'#4f6fff','Bullet Echo India':'#34d399','CookieRun India':'#fbbf24','Astro Arena':'#f87171','Road to Valor: Empires':'#a78bfa','Archery King':'#22d3ee','Sport Fantasy':'#f472b6'};
+let D=[],modes={ov:'daily',rt:'daily'},ch={},chatMsgs=[],TR={};
+const ML={daily:'일별',weekly:'주별',monthly:'월별'};
+
+(function(){const t=new Date(),s=new Date(t);s.setDate(t.getDate()-30);$('startDate').value=ff(s);$('endDate').value=ff(t);const sk=localStorage.getItem('claude_key');if(sk){$('aiKey').value=sk;$('aiStatus').innerHTML='<span style="color:var(--green)">✅ API Key 연결됨 · <a href="#" onclick="localStorage.removeItem(\'claude_key\');location.reload();return false" style="color:var(--t3);font-size:10px">초기화</a></span>'}})();
+
+function $(id){return document.getElementById(id)}
+function ff(d){return d.toISOString().split('T')[0]}
+function nn(v){return(v||0).toLocaleString()}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function av(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
+function med(a){if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function fm(m){if(!m||m<=0)return'-';if(m<60)return Math.round(m)+'분';if(m<1440)return Math.floor(m/60)+'h '+Math.round(m%60)+'m';return Math.floor(m/1440)+'일 '+Math.floor((m%1440)/60)+'h'}
+function bd(s){const m={resolved:['해결','g'],new:['신규','o'],agent_pending:['대기','b'],'new-for-agent':['대기','b']};const[l,c]=m[s]||[s||'-','p'];return`<span class="badge badge-${c}">${l}</span>`}
+function gD(i){return i.date||(i.created_at||'').split('T')[0]||''}
+function sL(s,t){$('loading').classList.toggle('on',s);if(t)$('loadingText').textContent=t}
+function showTab(nm){['overview','games','response','issues','ai'].forEach((id,i)=>{document.querySelectorAll('.tab')[i].classList.toggle('on',id===nm)});document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));$('tp-'+nm).classList.add('on')}
+function getKey(){let k=localStorage.getItem('claude_key');if(k)return k;k=prompt('Claude API Key 입력 (한번만 입력하면 저장됩니다):');if(k&&k.trim()){k=k.trim();localStorage.setItem('claude_key',k);$('aiKey').value=k;$('aiStatus').innerHTML='<span style="color:var(--green)">✅ 저장됨</span>';return k}return''}
+function setMode(tab,mode,el){modes[tab]=mode;el.parentElement.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');if(tab==='ov')rOverview();else rResponse()}
+
+// Group helper
+function grpBy(mode){const m={};D.forEach(i=>{const d=gD(i);if(!d)return;let k;if(mode==='daily')k=d;else if(mode==='weekly'){const dt=new Date(d),dy=dt.getDay(),mn=new Date(dt);mn.setDate(dt.getDate()-(dy===0?6:dy-1));k=ff(mn)}else k=d.substring(0,7);if(!m[k])m[k]={};m[k][i.game]=(m[k][i.game]||0)+1});return m}
+
+// FETCH - 긴 기간은 자동으로 월별 분할 호출
+async function fetchData(){
+  const sd=$('startDate').value,ed=$('endDate').value;if(!sd||!ed)return alert('날짜 선택');
+  sL(true,'조회 중...');$('btnFetch').disabled=true;D=[];TR={};
+  try{
+    // 기간을 30일 단위로 분할
+    const chunks=[];
+    let cur=new Date(sd);
+    const end=new Date(ed);
+    while(cur<=end){
+      const chunkEnd=new Date(cur);chunkEnd.setDate(chunkEnd.getDate()+6);
+      if(chunkEnd>end)chunkEnd.setTime(end.getTime());
+      chunks.push({start:ff(cur),end:ff(chunkEnd)});
+      cur=new Date(chunkEnd);cur.setDate(cur.getDate()+1);
+    }
+    for(let ci=0;ci<chunks.length;ci++){
+      const chunk=chunks[ci];
+      sL(true,`${ci+1}/${chunks.length} 구간 조회 중... (${chunk.start} ~ ${chunk.end})`);
+      await fetchChunk(chunk.start,chunk.end);
+    }
+    // 중복 제거 (id 기준)
+    const seen=new Set();D=D.filter(i=>{const id=String(i.id);if(seen.has(id))return false;seen.add(id);return true});
+    $('lastUpdate').textContent=`조회: ${new Date().toLocaleString('ko')} (${D.length}건)`;
+    const gf=$('issueGameFilter'),games=[...new Set(D.map(i=>i.game))].sort();
+    gf.innerHTML='<option value="">전체 게임</option>'+games.map(g=>`<option>${esc(g)}</option>`).join('');
+    renderAll();
+  }catch(e){alert('Error: '+e.message)}finally{sL(false);$('btnFetch').disabled=false}
+}
+async function fetchChunk(sd,ed,pg=1){
+  try{
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),90000); // 90초 타임아웃
+    const r=await fetch(WH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({start_date:sd,end_date:ed,app_id:$('gameSelect').value,tags:$('tagFilter').value,page:pg,page_size:1000}),signal:ctrl.signal});
+    clearTimeout(timer);
+    const d=await r.json();D=D.concat(d.issues||[]);
+    if(d.total_pages>pg&&pg<20){await new Promise(r=>setTimeout(r,300));await fetchChunk(sd,ed,pg+1)}
+  }catch(e){console.warn(`구간 ${sd}~${ed} 스킵:`,e.message)}
+}
+function renderAll(){rOverview();rGames();rResponse();renderIssues()}
+
+// OVERVIEW
+function rOverview(){
+  const t=D.length,res=D.filter(i=>i.state==='resolved').length,pend=D.filter(i=>['new','agent_pending','new-for-agent'].includes(i.state)).length,gms=new Set(D.map(i=>i.game)).size;
+  const fa=D.map(i=>i.response_minutes).filter(v=>v>0),ra=D.map(i=>i.resolution_minutes).filter(v=>v>0);
+  $('overviewCards').innerHTML=`<div class="cd"><div class="cd-lb">총 문의</div><div class="cd-v blue">${nn(t)}</div></div><div class="cd"><div class="cd-lb">해결됨</div><div class="cd-v green">${nn(res)}</div></div><div class="cd"><div class="cd-lb">대기중</div><div class="cd-v orange">${nn(pend)}</div></div><div class="cd"><div class="cd-lb">게임 수</div><div class="cd-v purple">${gms}</div></div><div class="cd"><div class="cd-lb">평균 FRT</div><div class="cd-v cyan">${fm(av(fa))}</div></div><div class="cd"><div class="cd-lb">평균 RT</div><div class="cd-v red">${fm(av(ra))}</div></div>`;
+  const m=modes.ov;$('ovChartTitle').textContent='📈 '+ML[m]+' 인입량';$('ovTableTitle').textContent='📋 '+ML[m]+' 상세';
+  const grp=grpBy(m),lbs=Object.keys(grp).sort(),gns=[...new Set(D.map(i=>i.game))].sort();
+  mc('trendChart','line',lbs,gns.map(g=>({label:g,data:lbs.map(l=>(grp[l]||{})[g]||0),borderColor:GC[g]||'#888',backgroundColor:(GC[g]||'#888')+'22',fill:true,tension:.3,borderWidth:2,pointRadius:lbs.length<15?3:0})));
+  // Table
+  $('ovTH').innerHTML=`<tr><th>${ML[m]}</th>${gns.map(g=>`<th style="color:${GC[g]||'#888'}">${g}</th>`).join('')}<th>합계</th></tr>`;
+  $('ovTB').innerHTML=lbs.map(l=>{const row=grp[l]||{};const tot=gns.reduce((s,g)=>s+(row[g]||0),0);return`<tr><td style="font-weight:600">${l}</td>${gns.map(g=>`<td>${row[g]||0}</td>`).join('')}<td style="font-weight:700;color:var(--accent)">${nn(tot)}</td></tr>`}).join('')+`<tr style="background:var(--card);font-weight:700"><td>합계</td>${gns.map(g=>`<td style="color:${GC[g]||'#888'}">${nn(D.filter(i=>i.game===g).length)}</td>`).join('')}<td style="color:var(--accent)">${nn(t)}</td></tr>`;
+  // Donut
+  const gc={};D.forEach(i=>gc[i.game]=(gc[i.game]||0)+1);const s=Object.entries(gc).sort((a,b)=>b[1]-a[1]);
+  mc('donutChart','doughnut',s.map(x=>x[0]),[{data:s.map(x=>x[1]),backgroundColor:s.map(x=>GC[x[0]]||'#888'),borderWidth:0}],{cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#8899bb',font:{size:9},padding:6}}}});
+  $('overviewGL').innerHTML=s.map(([g,c])=>`<div class="gi"><div class="gi-l"><div class="gi-dot" style="background:${GC[g]||'#888'}"></div><div class="gi-name">${g}</div></div><div class="gi-r"><span class="gi-cnt" style="color:${GC[g]||'#888'}">${nn(c)}건</span><span class="gi-pct">${(c/t*100).toFixed(1)}%</span></div></div>`).join('');
+}
+
+// GAMES
+function rGames(){
+  const gc={},gd={};D.forEach(i=>{gc[i.game]=(gc[i.game]||0)+1;const d=gD(i);if(d){if(!gd[i.game])gd[i.game]={};gd[i.game][d]=(gd[i.game][d]||0)+1}});
+  const s=Object.entries(gc).sort((a,b)=>b[1]-a[1]),t=D.length||1;
+  $('gameCards').innerHTML=s.map(([g,c])=>`<div class="cd"><div class="cd-lb">${g}</div><div class="cd-v" style="color:${GC[g]||'#888'}">${nn(c)}</div><div class="cd-sub">${(c/t*100).toFixed(1)}%</div></div>`).join('');
+  $('gameList').innerHTML=s.map(([g,c])=>`<div class="gi"><div class="gi-l"><div class="gi-dot" style="background:${GC[g]||'#888'}"></div><div class="gi-name">${g}</div></div><div class="gi-r"><span class="gi-cnt" style="color:${GC[g]||'#888'}">${nn(c)}건</span><span class="gi-pct">${(c/t*100).toFixed(1)}%</span></div></div>`).join('');
+  $('gbWrap').style.height=Math.max(100,s.length*36)+'px';
+  mc('gameBarChart','bar',s.map(x=>x[0]),[{data:s.map(x=>x[1]),backgroundColor:s.map(x=>GC[x[0]]||'#888'),borderRadius:4,barThickness:22}],{indexAxis:'y'});
+  const dates=[...new Set(D.map(i=>gD(i)).filter(Boolean))].sort();
+  mc('gameLineChart','line',dates,Object.keys(gd).map(g=>({label:g,data:dates.map(d=>gd[g][d]||0),borderColor:GC[g]||'#888',tension:.3,borderWidth:2,pointRadius:dates.length<15?3:0})));
+}
+
+// RESPONSE - with sub-tabs
+function rResponse(){
+  // 게임 필터 업데이트
+  const gf=$('rtGameFilter'),curVal=gf.value;
+  const games=[...new Set(D.map(i=>i.game))].sort();
+  gf.innerHTML='<option value="">전체 게임</option>'+games.map(g=>`<option${g===curVal?' selected':''}>${esc(g)}</option>`).join('');
+
+  const selGame=gf.value;
+  const filtered=selGame?D.filter(i=>i.game===selGame):D;
+
+  const af=filtered.map(i=>i.response_minutes).filter(v=>v>0),ar=filtered.map(i=>i.resolution_minutes).filter(v=>v>0);
+  const label=selGame||'전체';
+  $('rtCards').innerHTML=`<div class="cd"><div class="cd-lb">평균 FRT</div><div class="cd-v cyan">${fm(av(af))}</div><div class="cd-sub">${af.length}건</div></div><div class="cd"><div class="cd-lb">중앙 FRT</div><div class="cd-v blue">${fm(med(af))}</div></div><div class="cd"><div class="cd-lb">평균 RT</div><div class="cd-v orange">${fm(av(ar))}</div><div class="cd-sub">${ar.length}건</div></div><div class="cd"><div class="cd-lb">중앙 RT</div><div class="cd-v purple">${fm(med(ar))}</div></div><div class="cd"><div class="cd-lb">FRT≤30분</div><div class="cd-v green">${af.length?Math.round(af.filter(v=>v<=30).length/af.length*100):0}%</div></div><div class="cd"><div class="cd-lb">RT≤24h</div><div class="cd-v green">${ar.length?Math.round(ar.filter(v=>v<=1440).length/ar.length*100):0}%</div></div>`;
+
+  const m=modes.rt;
+  $('rtChartTitle').textContent='📈 '+ML[m]+' 응답시간'+(selGame?' ('+selGame+')':'');
+  $('rtTableTitle').textContent='📋 '+ML[m]+' 응답시간 상세'+(selGame?' ('+selGame+')':'');
+
+  // Group by period
+  const byPeriod={};
+  filtered.forEach(i=>{const d=gD(i);if(!d)return;let k;if(m==='daily')k=d;else if(m==='weekly'){const dt=new Date(d),dy=dt.getDay(),mn=new Date(dt);mn.setDate(dt.getDate()-(dy===0?6:dy-1));k=ff(mn)}else k=d.substring(0,7);if(!byPeriod[k])byPeriod[k]={frt:[],rt:[],count:0};byPeriod[k].count++;if(i.response_minutes>0)byPeriod[k].frt.push(i.response_minutes);if(i.resolution_minutes>0)byPeriod[k].rt.push(i.resolution_minutes)});
+  const periods=Object.keys(byPeriod).sort();
+
+  // Chart - 전체일 때 게임별 라인, 게임 선택 시 FRT/RT 라인
+  if(selGame){
+    mc('rtTrendChart','line',periods,[{label:'평균 FRT(분)',data:periods.map(p=>Math.round(av(byPeriod[p].frt))),borderColor:'#22d3ee',tension:.3,borderWidth:2,pointRadius:periods.length<20?3:0},{label:'평균 RT(분)',data:periods.map(p=>Math.round(av(byPeriod[p].rt))),borderColor:'#fbbf24',tension:.3,borderWidth:2,pointRadius:periods.length<20?3:0}]);
+  } else {
+    // 전체: 게임별 RT 추이
+    const gByP={};
+    D.forEach(i=>{const d=gD(i);if(!d||i.resolution_minutes<=0)return;let k;if(m==='daily')k=d;else if(m==='weekly'){const dt=new Date(d),dy=dt.getDay(),mn=new Date(dt);mn.setDate(dt.getDate()-(dy===0?6:dy-1));k=ff(mn)}else k=d.substring(0,7);if(!gByP[k])gByP[k]={};if(!gByP[k][i.game])gByP[k][i.game]=[];gByP[k][i.game].push(i.resolution_minutes)});
+    const allP=Object.keys(gByP).sort();
+    const gNames=[...new Set(D.filter(i=>i.resolution_minutes>0).map(i=>i.game))];
+    mc('rtTrendChart','line',allP,gNames.map(g=>({label:g+' RT',data:allP.map(p=>gByP[p]&&gByP[p][g]?Math.round(av(gByP[p][g])):0),borderColor:GC[g]||'#888',tension:.3,borderWidth:2,pointRadius:allP.length<20?3:0})));
+  }
+
+  // Table - 게임별 컬럼
+  const allGames=[...new Set(D.map(i=>i.game))].sort();
+  const gByPeriod={};
+  D.forEach(i=>{const d=gD(i);if(!d)return;let k;if(m==='daily')k=d;else if(m==='weekly'){const dt=new Date(d),dy=dt.getDay(),mn=new Date(dt);mn.setDate(dt.getDate()-(dy===0?6:dy-1));k=ff(mn)}else k=d.substring(0,7);if(!gByPeriod[k])gByPeriod[k]={};if(!gByPeriod[k][i.game])gByPeriod[k][i.game]={frt:[],rt:[],cnt:0};gByPeriod[k][i.game].cnt++;if(i.response_minutes>0)gByPeriod[k][i.game].frt.push(i.response_minutes);if(i.resolution_minutes>0)gByPeriod[k][i.game].rt.push(i.resolution_minutes)});
+  const allPeriods=Object.keys(gByPeriod).sort();
+
+  if(selGame){
+    // 특정 게임: 기간 × FRT/RT
+    $('rtTH').innerHTML=`<tr><th>${ML[m]}</th><th>문의수</th><th>평균 FRT</th><th>평균 RT</th><th>FRT건수</th><th>RT건수</th></tr>`;
+    $('rtTB').innerHTML=periods.map(p=>{const d=byPeriod[p];return`<tr><td style="font-weight:600">${p}</td><td>${d.count}</td><td style="color:var(--cyan)">${fm(av(d.frt))}</td><td style="color:var(--orange);cursor:pointer;text-decoration:underline" onclick="showRtDetail('${p}','${selGame}')">${fm(av(d.rt))}</td><td>${d.frt.length}</td><td>${d.rt.length}</td></tr>`}).join('');
+  } else {
+    // 전체: 기간 × 게임별 RT (클릭 가능)
+    $('rtTH').innerHTML=`<tr><th>${ML[m]}</th>${allGames.map(g=>`<th style="color:${GC[g]||'#888'};font-size:9px">${g}</th>`).join('')}<th>전체 RT</th></tr>`;
+    $('rtTB').innerHTML=allPeriods.map(p=>{const gd=gByPeriod[p]||{};const allRt=[];allGames.forEach(g=>{if(gd[g])allRt.push(...gd[g].rt)});return`<tr><td style="font-weight:600">${p}</td>${allGames.map(g=>{const d=gd[g];if(!d)return'<td>-</td>';const rt=av(d.rt);return`<td style="color:${GC[g]||'#888'};cursor:pointer" onclick="showRtDetail('${p}','${g}')">${rt>0?fm(rt):'-'}<span style="color:var(--t3);font-size:9px"> (${d.cnt})</span></td>`}).join('')}<td style="font-weight:700;color:var(--orange)">${allRt.length?fm(av(allRt)):'-'}</td></tr>`}).join('');
+  }
+
+  // Game bars (always show all games)
+  const bg2={};D.forEach(i=>{if(!bg2[i.game])bg2[i.game]={frt:[],rt:[]};if(i.response_minutes>0)bg2[i.game].frt.push(i.response_minutes);if(i.resolution_minutes>0)bg2[i.game].rt.push(i.resolution_minutes)});
+  const mxF=Math.max(...Object.values(bg2).map(v=>av(v.frt)).filter(v=>v>0),1);
+  $('frtBars').innerHTML=Object.entries(bg2).filter(([,v])=>v.frt.length>0).sort((a,b)=>av(b[1].frt)-av(a[1].frt)).map(([g,v])=>{const a=av(v.frt);const sel=selGame&&g===selGame?' style="border:1px solid var(--accent)"':'';return`<div class="metric-bar"${sel}><div class="metric-label">${g}</div><div class="metric-fill-wrap"><div class="metric-fill" style="width:${a/mxF*100}%;background:${GC[g]||'#888'}"></div></div><div class="metric-val" style="color:${GC[g]||'#888'}">${fm(a)}</div></div>`}).join('')||'<div class="empty-state"><p>FRT 데이터 없음</p></div>';
+  const mxR=Math.max(...Object.values(bg2).map(v=>av(v.rt)).filter(v=>v>0),1);
+  $('rtBars').innerHTML=Object.entries(bg2).filter(([,v])=>v.rt.length>0).sort((a,b)=>av(b[1].rt)-av(a[1].rt)).map(([g,v])=>{const a=av(v.rt);const sel=selGame&&g===selGame?' style="border:1px solid var(--accent)"':'';return`<div class="metric-bar"${sel}><div class="metric-label">${g}</div><div class="metric-fill-wrap"><div class="metric-fill" style="width:${a/mxR*100}%;background:${GC[g]||'#888'}"></div></div><div class="metric-val" style="color:${GC[g]||'#888'}">${fm(a)}</div></div>`}).join('')||'<div class="empty-state"><p>RT 데이터 없음</p></div>';
+}
+
+// ISSUES
+let issPage=1;
+function renderIssues(pg){if(pg)issPage=pg;else pg=issPage;const gf=$('issueGameFilter').value;let fil=D;if(gf)fil=fil.filter(i=>i.game===gf);$('issueCount').textContent=`(${nn(fil.length)}건)`;const pp=20,tp=Math.ceil(fil.length/pp),items=fil.slice((pg-1)*pp,(pg-1)*pp+pp);const autoTr=$('autoTranslate').checked&&getKey();
+$('issueList').innerHTML=items.map((i,idx)=>{const gIdx=(pg-1)*pp+idx,id=String(i.id||''),body=i.full_messages||i.body||i.title||'(없음)',isLong=body.length>200;let trH='';if(TR[id])trH=`<div class="issue-tr"><div class="issue-tr-label">🇰🇷 한국어 번역</div>${esc(TR[id])}</div>`;else if(autoTr){trH=`<div class="issue-tr" id="tr-${id}" style="opacity:.5"><div class="issue-tr-label">🇰🇷 번역 중...</div></div>`;setTimeout(()=>autoTR(id,body.substring(0,1500)),idx*800)}
+return`<div class="issue-card" onclick="showD(${gIdx})"><div class="issue-header"><div><span class="issue-game" style="color:${GC[i.game]||'#888'}">${i.game||'-'}</span> <span class="issue-id">#${id.slice(-6)||id}</span></div>${bd(i.state)}</div><div class="issue-meta"><span>📅 ${gD(i)}</span><span>👤 ${esc(i.assignee||'-')}</span>${i.response_minutes>0?`<span>⏱ ${fm(i.response_minutes)}</span>`:''}</div><div class="issue-body${isLong?' short':''}" id="ib-${gIdx}">${esc(body)}</div>${isLong?`<span class="issue-expand" onclick="event.stopPropagation();tgl(${gIdx})">▼ 더 보기</span>`:''}${trH}</div>`}).join('')||'<div class="empty-state"><p>조회 버튼 클릭</p></div>';
+$('paging').innerHTML=tp>1?`<button class="btn btn-s" onclick="renderIssues(${Math.max(1,pg-1)})" ${pg<=1?'disabled':''}>◀</button><span>${pg}/${tp}</span><button class="btn btn-s" onclick="renderIssues(${Math.min(tp,pg+1)})" ${pg>=tp?'disabled':''}>▶</button>`:'';}
+function tgl(idx){const el=$('ib-'+idx);if(!el)return;const c=el.classList.toggle('short');const b=el.nextElementSibling;if(b)b.textContent=c?'▼ 더 보기':'▲ 접기'}
+async function autoTR(id,text){if(TR[id])return;const k=getKey();if(!k)return;try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:`다음 텍스트를 한국어로 번역만 해줘:\n\n${text}`}]})});const d=await r.json();TR[id]=d.content?.[0]?.text||'번역 실패';const el=$('tr-'+id);if(el){el.style.opacity='1';el.innerHTML=`<div class="issue-tr-label">🇰🇷 한국어 번역</div>${esc(TR[id])}`}}catch(e){const el=$('tr-'+id);if(el)el.innerHTML='<div class="issue-tr-label">❌ 오류</div>'}}
+function showD(idx){const i=D[idx];if(!i)return;const id=String(i.id||''),body=i.full_messages||i.body||i.title||'';const trH=TR[id]?`<div class="detail-field"><div class="detail-label">🇰🇷 한국어 번역</div><div class="detail-msg" style="color:var(--green);border-left:3px solid var(--green)">${esc(TR[id])}</div></div>`:'';
+$('detailContent').innerHTML=`<h3 style="margin-bottom:14px;padding-right:32px;font-size:15px">${esc(i.title||'문의 상세')}</h3><div class="detail-field"><div class="detail-label">티켓 ID</div><div class="detail-value" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)">${id}</div></div><div class="detail-field"><div class="detail-label">게임</div><div class="detail-value" style="color:${GC[i.game]||'#888'}">${i.game}</div></div><div class="detail-field"><div class="detail-label">상태 / 날짜</div><div class="detail-value">${bd(i.state)} · ${gD(i)} ${i.time||''}</div></div><div class="detail-field"><div class="detail-label">담당자</div><div class="detail-value">${esc(i.assignee||'-')}</div></div><div class="detail-field"><div class="detail-label">FRT / RT</div><div class="detail-value">${i.response_minutes>0?fm(i.response_minutes):'-'} / ${i.resolution_minutes>0?fm(i.resolution_minutes):'-'}</div></div><div class="detail-field"><div class="detail-label">원문</div><div class="detail-msg">${esc(body)}</div></div>${trH}`;
+$('detailOverlay').classList.add('on')}
+function closeDetail(){$('detailOverlay').classList.remove('on')}
+
+// RT 셀 클릭 시 상세 보기
+function showRtDetail(period,game){
+  const m=modes.rt;
+  // 해당 기간+게임 이슈 필터
+  const issues=D.filter(i=>{
+    if(game&&i.game!==game)return false;
+    const d=gD(i);if(!d)return false;
+    let k;if(m==='daily')k=d;else if(m==='weekly'){const dt=new Date(d),dy=dt.getDay(),mn=new Date(dt);mn.setDate(dt.getDate()-(dy===0?6:dy-1));k=ff(mn)}else k=d.substring(0,7);
+    return k===period;
+  });
+  // RT 높은 순으로 정렬, 상위 5건
+  const sorted=issues.filter(i=>i.resolution_minutes>0).sort((a,b)=>b.resolution_minutes-a.resolution_minutes).slice(0,5);
+  const gameName=game||'전체';
+  const totalIssues=issues.length;
+  const rtIssues=issues.filter(i=>i.resolution_minutes>0);
+  const avgRt=av(rtIssues.map(i=>i.resolution_minutes));
+
+  let html=`<h3 style="margin-bottom:14px;font-size:15px">⏱️ ${period} · <span style="color:${GC[game]||'var(--accent)'}">${gameName}</span></h3>`;
+  html+=`<div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+    <div class="cd" style="flex:1;min-width:80px"><div class="cd-lb">총 문의</div><div class="cd-v blue">${totalIssues}</div></div>
+    <div class="cd" style="flex:1;min-width:80px"><div class="cd-lb">RT 건수</div><div class="cd-v orange">${rtIssues.length}</div></div>
+    <div class="cd" style="flex:1;min-width:80px"><div class="cd-lb">평균 RT</div><div class="cd-v red">${fm(avgRt)}</div></div>
+  </div>`;
+
+  if(sorted.length===0){
+    html+='<div class="empty-state"><p>RT 데이터가 있는 문의가 없습니다</p></div>';
+  } else {
+    html+=`<div style="font-size:12px;font-weight:600;margin-bottom:8px">🔴 RT 높은 상위 ${sorted.length}건</div>`;
+    for(const i of sorted){
+      const id=String(i.id||'');
+      const body=i.full_messages||i.body||i.title||'(없음)';
+      const trH=TR[id]?`<div style="background:var(--card);border-left:3px solid var(--green);padding:8px 10px;margin-top:6px;border-radius:0 6px 6px 0"><div style="font-size:9px;color:var(--t3);margin-bottom:2px">🇰🇷 번역</div><div style="font-size:11px;color:var(--green);line-height:1.5">${esc(TR[id])}</div></div>`:'';
+
+      html+=`<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div><span style="color:${GC[i.game]||'#888'};font-weight:600;font-size:11px">${i.game}</span> <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)">#${id}</span></div>
+          <div style="font-weight:700;color:var(--orange);font-size:13px">${fm(i.resolution_minutes)}</div>
+        </div>
+        <div style="display:flex;gap:10px;font-size:10px;color:var(--t3);margin-bottom:6px">
+          <span>📅 ${gD(i)}</span><span>👤 ${esc(i.assignee||'-')}</span>${bd(i.state)}
+        </div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:120px;overflow-y:auto">${esc(body.substring(0,500))}</div>
+        ${trH}
+        <div style="margin-top:6px"><button class="btn btn-s" style="font-size:9px;padding:3px 8px" onclick="event.stopPropagation();trIssue('${id}',\`${body.replace(/`/g,"'").replace(/\\/g,"\\\\").substring(0,800)}\`)">🌐 번역</button></div>
+      </div>`;
+    }
+  }
+  $('detailContent').innerHTML=html;
+  $('detailOverlay').classList.add('on');
+}
+
+// 상세 패널 내 번역
+async function trIssue(id,text){
+  if(TR[id])return;const k=getKey();if(!k)return;
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:`한국어로 번역만:\n\n${text}`}]})});const d=await r.json();TR[id]=d.content?.[0]?.text||'실패';showRtDetail._last&&showRtDetail._last()}catch(e){}
+}
+
+// AI
+async function sendChat(){const inp=$('chatInput'),m=inp.value.trim();if(!m)return;inp.value='';askAI(m)}
+async function askAI(p){const k=getKey();if(!k)return;addC('user',p);
+  // 풍부한 컨텍스트 생성
+  const gc={},gs={},dailyCnt={};
+  D.forEach(i=>{
+    gc[i.game]=(gc[i.game]||0)+1;
+    if(!gs[i.game])gs[i.game]={frt:[],rt:[],states:{},issues:[]};
+    if(i.response_minutes>0)gs[i.game].frt.push(i.response_minutes);
+    if(i.resolution_minutes>0)gs[i.game].rt.push(i.resolution_minutes);
+    const st=i.state||'unknown';gs[i.game].states[st]=(gs[i.game].states[st]||0)+1;
+    if(gs[i.game].issues.length<5)gs[i.game].issues.push((i.body||i.title||'').substring(0,100));
+    const d=gD(i);if(d)dailyCnt[d]=(dailyCnt[d]||0)+1;
+  });
+  const allFrt=D.map(i=>i.response_minutes).filter(v=>v>0);
+  const allRt=D.map(i=>i.resolution_minutes).filter(v=>v>0);
+  const dates=Object.keys(dailyCnt).sort();
+  const peakDay=dates.length?dates.reduce((a,b)=>dailyCnt[a]>dailyCnt[b]?a:b):'없음';
+  
+  let ctx=`## KRAFTON India CS 데이터 (실시간 조회 결과)\n`;
+  ctx+=`- 조회 기간: ${$('startDate').value} ~ ${$('endDate').value}\n`;
+  ctx+=`- 총 문의: ${D.length}건\n`;
+  ctx+=`- 해결: ${D.filter(i=>i.state==='resolved').length}건, 대기: ${D.filter(i=>['new','agent_pending','new-for-agent'].includes(i.state)).length}건\n`;
+  ctx+=`- 전체 평균 FRT: ${fm(av(allFrt))} (${allFrt.length}건), 중앙값: ${fm(med(allFrt))}\n`;
+  ctx+=`- 전체 평균 RT: ${fm(av(allRt))} (${allRt.length}건), 중앙값: ${fm(med(allRt))}\n`;
+  ctx+=`- FRT≤30분 비율: ${allFrt.length?Math.round(allFrt.filter(v=>v<=30).length/allFrt.length*100):0}%\n`;
+  ctx+=`- RT≤24시간 비율: ${allRt.length?Math.round(allRt.filter(v=>v<=1440).length/allRt.length*100):0}%\n`;
+  ctx+=`- 피크일: ${peakDay} (${dailyCnt[peakDay]||0}건)\n\n`;
+  ctx+=`## 게임별 상세\n`;
+  Object.entries(gs).sort((a,b)=>(gc[b[0]]||0)-(gc[a[0]]||0)).forEach(([g,s])=>{
+    ctx+=`### ${g} (${gc[g]}건, ${(gc[g]/D.length*100).toFixed(1)}%)\n`;
+    ctx+=`- 상태: ${Object.entries(s.states).map(([k,v])=>k+':'+v).join(', ')}\n`;
+    ctx+=`- 평균 FRT: ${fm(av(s.frt))} (${s.frt.length}건), 평균 RT: ${fm(av(s.rt))} (${s.rt.length}건)\n`;
+    ctx+=`- 주요 문의: ${s.issues.join(' | ')}\n\n`;
+  });
+  ctx+=`## 일별 추이 (최근 14일)\n`;
+  dates.slice(-14).forEach(d=>{ctx+=`${d}: ${dailyCnt[d]}건\n`});
+  ctx+=`\n## 샘플 문의 50건\n`;
+  ctx+=D.slice(0,50).map(i=>`[${i.game}] ${i.state} | RT:${fm(i.resolution_minutes)} | ${(i.body||i.title||'').substring(0,80)}`).join('\n');
+
+  const th=addC('ai','분석 중...');th.classList.add('thinking');chatMsgs.push({role:'user',content:p});
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,system:'KRAFTON India CS 데이터 분석 전문가. 아래 실시간 데이터를 기반으로 한국어로 상세하게 분석해줘. 수치와 근거를 반드시 포함해서 답변해.\n\n'+ctx,messages:chatMsgs.slice(-10)})});const d=await r.json(),rp=d.content?.[0]?.text||d.error?.message||'응답없음';chatMsgs.push({role:'assistant',content:rp});th.classList.remove('thinking');th.textContent=rp}catch(e){th.classList.remove('thinking');th.textContent='오류:'+e.message}}
+function addC(r,t){const b=$('chatBox'),d=document.createElement('div');d.className='chat-msg '+r;d.textContent=t;b.appendChild(d);b.scrollTop=b.scrollHeight;return d}
+
+// CHART
+function mc(id,type,labels,datasets,extra={}){if(ch[id])ch[id].destroy();const ctx=$(id);if(!ctx)return;const isC=type==='doughnut';ch[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1&&!isC,labels:{color:'#8899bb',font:{size:9,family:'Outfit'},boxWidth:8,padding:6}},tooltip:{backgroundColor:'#1a2235',titleColor:'#f0f4ff',bodyColor:'#8899bb',borderColor:'#2a3550',borderWidth:1,cornerRadius:5,padding:7}},scales:isC?{}:{x:{grid:{color:'rgba(42,53,80,.3)'},ticks:{color:'#556688',font:{size:8},maxRotation:45}},y:{grid:{color:'rgba(42,53,80,.3)'},ticks:{color:'#556688',font:{size:8}},beginAtZero:true}},...extra}})}
+
+// CSV
+function downloadCSV(){if(!D.length)return alert('없음');const h=['id','date','game','state','assignee','frt_min','rt_min','tags','title','body','translation'];const rows=D.map(i=>{const id=String(i.id||'');return[id,gD(i),i.game||'',i.state||'',i.assignee||'',i.response_minutes||'',i.resolution_minutes||'',i.tags||'','"'+(i.title||'').replace(/"/g,'""')+'"','"'+(i.body||'').replace(/"/g,'""')+'"','"'+(TR[id]||'').replace(/"/g,'""')+'"']});const csv='\uFEFF'+[h.join(','),...rows.map(r=>r.join(','))].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=`CS_${$('startDate').value}.csv`;a.click()}
+</script>
+</body>
+</html>
